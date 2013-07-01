@@ -1,0 +1,227 @@
+package com.asp.proto; 
+
+import "common.proto";
+
+//ERROR_MESSAGE
+message ErrorMessage {
+	required ErrorType err_code = 1;
+	required string err_cause = 2;
+} 
+//NOTIFY_MESSAGE
+message NotifyMessage {
+	optional bool success = 1;
+	optional string message = 2;
+}
+
+enum ISPType {
+  CHINA_TELECOM = 1;
+  CHINA_UNICOM = 2;
+}
+
+enum MobileDeviceType {
+	IPHONE = 1;
+	ANDROID = 2;
+	WINDOWS = 3;
+}
+
+message CityInfo {
+	required int32 cityId = 1; // 城市ID
+	required string cityName = 2; // 城市名
+}
+
+message ServerItem {
+  required string host = 1;
+  required int32 port = 2;
+  required int32 isp_type = 3;
+  required string isp_desc = 4;
+}
+
+//GET_SERVER_LIST_REQUEST
+message GetServerListRequest {
+	required string uid = 1;
+}
+
+//GET_SERVER_LIST_RESPONSE
+message GetServerListResponse {
+  repeated ServerItem items = 1;
+}
+
+message GetSupportedCityRequest {
+	required string uid = 1;
+} 
+//GET_SUPPORTED_CITY_RESPONSE
+message GetSupportedCityResponse {
+	repeated CityInfo cities = 1;
+}
+
+message UserSetting{
+	optional bool push_enable = 1;
+}
+
+message SaveGetSettingRequest {
+	required int32 city = 1;
+	required string uid = 2;
+	required bool save_setting = 3; //true 为save， false为get
+	optional UserSetting setting = 4;
+} 
+//SAVE_GET_SETTING_RESPONSE, 保存或者获取设置
+message SaveGetSettingResponse {
+	optional UserSetting setting = 1;
+} 
+//SUBMIT_ADVISE_REQUEST 提交建议
+
+message SubmitAdviseRequest {
+	required int32 city = 1;
+	required string uid = 2;
+	required string advise = 3;
+	optional string email = 4;
+}
+
+//App安装后第一次启动发送， APP_USER_REGIST
+message AppUserRegister {
+	required int32 city = 1;
+	required string uid = 2;
+	required MobileDeviceType device_type = 3;
+} 
+//App启动后发送， APP_USER_LOGIN，统计用
+message AppUserLogin {
+	required int32 city = 1;
+	required string uid = 2;
+	optional string app_ver = 3;
+	optional string app_os = 4;
+	optional string push_token = 5; //iphone填充推送的token
+}
+
+message AppUserLogout {
+	required int32 city = 1;
+	required string uid = 2;
+}
+
+//CheckUpdatesRequest协议用于检查更新，以及获取app市场URL
+message CheckUpdatesRequest {
+	required int32 city = 1;
+	required string uid = 2;
+	required MobileDeviceType device_type = 3;//当前设备类型
+	required string version = 4;          //当前版本号
+	optional string install_channel = 5;  //安装渠道名称
+}
+
+message CheckUpdatesResponse {
+	optional string new_version = 1; //新版本，若无新版本，此字段为空
+	optional string appstore_url = 2;//app市场URL
+}
+
+//CheckUpdatesRequest协议用于检查更新，以及获取app市场URL
+enum AppstoreUrlType {
+	INSTALL_URL = 1;
+	REVIEW_URL = 2;
+}
+message GetAppstoreURLRequest {
+	required int32 city = 1;
+	required string uid = 2;
+	required MobileDeviceType device_type = 3;//当前设备类型
+    required AppstoreUrlType url_type = 4;
+    optional string install_channel = 5;  //安装渠道名称
+}
+
+message GetAppstoreURLResponse {
+	required AppstoreUrlType url_type = 1;
+	required string url = 2;
+}
+
+//协议场景：
+//App启动时，
+//需要获取serverlist， 发送GetServerListRequest
+
+//需要获取支持的城市列表（包含city_id）， 发送GetSupportedCityRequest, 结果缓存到本地
+
+//以下所有协议请求需要携带city id
+
+//支持的租车类型，现在有3种: "接机", "送机", "时租"
+enum SupportCarRentalType { 
+	AIRPORT_ARRIVAL = 1; //接机
+	AIRPORT_DEPARTURE = 2; //送机
+	HOURLY_RENTAL = 3; //时租
+}
+
+//获取车型列表
+message GetSupportCarTypeRequest {
+	required int32 city = 1;
+	required string uid = 2;
+	required int32 offset = 3;
+	required int32 count = 4;
+}
+
+message CarTypeItem {
+	required string carTypeName = 1; // 车型名称 例如 "Economy"
+	required string carTypeId = 2; // 车型ID，形如"economy", 用于标识车型，与名称关联，方便名称做国际化
+	required string description = 3; // 车型描述, 比如 "Have 4 seats"
+	required string iconUrl = 4; // 车型图标地址, 比如 "img/cars/car1.png",可以考虑使用应用内嵌的图标,见HTMLPlayground/www/img/cars
+	required int32 baseFee = 5; // 基本费用，例如 200。
+	required int32 extraFeePerHour = 6; // 超时的费用, 例如 40 元每小时。
+}
+
+message GetSupportCarTypeResponse {
+	repeated CarTypeItem items = 1;
+	required int32 rest = 2;
+}
+
+//提交订单
+enum OrderStatus {
+	SUBMITED = 1; // 服务器完成客户提交的订单
+	CONFIRMED = 2;  // 工作人员为客户安排好车辆了，
+	CANCELED = 3; // 客户把订单取消了
+	COMPLETED = 4; // ??因为各种原因没能完成订单安排，??
+}
+message CarRentOrderItem {
+	required string orderId = 1;
+    required int32 rentTypeId = 2; // 见SupportCarRentalType
+    required string carTypeId = 3; // 见GetSupportCarTypeResponse, 
+    required string startDate = 4; // 开始时间
+    required string contactName = 5;
+    required string contactPhone = 6;
+    required string contactEmail = 7;
+    required string pickUpAt = 8; // 接乘客的地点
+    required string destination = 9; // 乘客的目的地
+    required OrderStatus orderStatus = 10; // 订单状态，见OrderStatus
+    optional string flightNumber = 11; // 航班编号
+    optional string planRentHours = 12; // 计划用车的小时数
+    optional string invoiceTitle = 13; // 发票抬头
+    optional bool need_english_driver = 14; // 是否需要司机会英语
+}
+
+message SubmitCarRentOrderRequest {
+	required int32 city = 1;
+	required string uid = 2;
+	required CarRentOrderItem order = 3;
+}
+
+// ??Response 一定是订车成功时返回; 错误返回rrorMessage
+message SubmitCarRentOrderResponse {
+	required string orderId = 1;
+	required OrderStatus orderStatus = 2;
+}
+
+// 取消订单
+message CancelCarRentOrderRequest {
+	required int32 city = 1;
+	required string uid = 2;
+	required string orderId = 3;
+} 
+
+message CancelCarRentOrderResponse {
+	required string orderId = 1;
+	required OrderStatus orderStatus = 2;
+} 
+
+//查询订单状态 ??是否需要和 CancelCarRentOrderRequest合并??
+message QueryCarRentOrderStatusRequest {
+	required int32 city = 1;
+	required string uid = 2;
+	required string orderId = 3; 
+}
+
+message QueryCarRentOrderStatusResponse {
+	required string orderId = 1;
+	required OrderStatus orderStatus = 2; 
+}
