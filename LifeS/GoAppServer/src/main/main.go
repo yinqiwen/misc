@@ -84,9 +84,8 @@ func main() {
 	port := flag.Int64("port", 8080, "Specify web server port")
 	host := flag.String("host", "0.0.0.0", "Specify web server host")
 	flag.Parse()
-	daemon(1, 1)
+	//daemon(1, 1)
 	common.InitLogger()
-
 	initWebHandlers()
 	if l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", *host, *port)); nil != err {
 		fmt.Printf("Failed to launch app http server for reason:%v\n", err)
