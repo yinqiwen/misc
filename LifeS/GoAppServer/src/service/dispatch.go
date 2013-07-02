@@ -81,22 +81,31 @@ func Dispatch(w http.ResponseWriter, r *http.Request) {
 	case com_asp_proto.MessageType_GET_SERVER_LIST_REQUEST:
 		var req com_asp_proto.GetServerListRequest
 		err = proto.Unmarshal(body, &req)
-		if nil != err {
+		if nil == err {
 			handleGetServerList(w, &req)
 		}
 	case com_asp_proto.MessageType_CANCEL_CAR_RENT_ORDER_REQUEST:
 		var req com_asp_proto.CancelCarRentOrderRequest
 		err = proto.Unmarshal(body, &req)
+		if nil == err {
+			handleCancelOrder(w, &req)
+		}
 	case com_asp_proto.MessageType_SUBMIT_CAR_RENT_ORDER_REQUEST:
 		var req com_asp_proto.SubmitCarRentOrderRequest
 		err = proto.Unmarshal(body, &req)
+		if nil == err {
+			handleSubmitOrder(w, &req)
+		}
 	case com_asp_proto.MessageType_QUERY_CAR_RENT_ORDER_STATUS_REQUEST:
 		var req com_asp_proto.QueryCarRentOrderStatusRequest
 		err = proto.Unmarshal(body, &req)
+		if nil == err {
+			handleQueryOrder(w, &req)
+		}
 	case com_asp_proto.MessageType_SUBMIT_ADVISE_REQUEST:
 		var req com_asp_proto.SubmitAdviseRequest
 		err = proto.Unmarshal(body, &req)
-		if nil != err {
+		if nil == err {
 			handleSubmitAdvice(w, &req)
 		}
 	}

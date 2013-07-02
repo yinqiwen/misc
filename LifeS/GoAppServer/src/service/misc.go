@@ -2,8 +2,8 @@ package service
 
 import (
 	"com_asp_proto"
-	//"github.com/ziutek/mymysql/mysql"
 	"net/http"
+	//"unicode/utf8"
 )
 
 func handleGetServerList(w http.ResponseWriter, req *com_asp_proto.GetServerListRequest) {
@@ -29,9 +29,9 @@ func handleSubmitAdvice(w http.ResponseWriter, req *com_asp_proto.SubmitAdviseRe
 			stmt.Run(req.Email, req.Uid)
 		}
 	}
-
 	stmt, err := getUserDBConn().Prepare("replace t_app_user_advice(uid,email,advice) values(?, ?, ?)")
 	if nil == err {
+		//r, _ := utf8.DecodeLastRune([]byte(req.GetAdvise()))
 		stmt.Run(req.Uid, req.Email, req.Advise)
 	}
 	res.Success = new(bool)

@@ -17,7 +17,7 @@ type MultiWriter struct {
 }
 
 func (writer *MultiWriter) Write(p []byte) (n int, err error) {
-	//fmt.Print(string(p))
+	fmt.Print(string(p))
 	if nil != writer.file {
 		_, err := writer.file.Write(p)
 		if nil != err {
