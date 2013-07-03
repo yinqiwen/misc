@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"strings"
 
-//	"util"
 )
 
 const MAGIC_HEADER uint16 = 0xFADA
@@ -115,6 +114,6 @@ func Dispatch(w http.ResponseWriter, r *http.Request) {
 		log.Printf("[ERROR]Failed to parse proto request:%v", err)
 		return
 	} else {
-		log.Printf("Parse proto request:%d success", proto_type)
+		//log.Printf("Parse proto request:%d success", proto_type)
 	}
 }

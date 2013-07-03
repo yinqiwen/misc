@@ -17,7 +17,10 @@ type MultiWriter struct {
 }
 
 func (writer *MultiWriter) Write(p []byte) (n int, err error) {
-	fmt.Print(string(p))
+	if !EnableDaemon {
+		fmt.Print(string(p))
+	}
+
 	if nil != writer.file {
 		_, err := writer.file.Write(p)
 		if nil != err {
@@ -53,7 +56,6 @@ func initLogWriter(path string) *MultiWriter {
 	logWriter = writer
 	return writer
 }
-
 
 func AddLogWriter(writer io.Writer) {
 	logWriter.writers = append(logWriter.writers, writer)

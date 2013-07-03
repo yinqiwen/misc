@@ -2,13 +2,14 @@ package main
 
 import (
 	"common"
-	"flag"
+	//"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
 	"service"
 	"syscall"
@@ -81,13 +82,28 @@ func initWebHandlers() {
 }
 
 func main() {
-	port := flag.Int64("port", 8080, "Specify web server port")
-	host := flag.String("host", "0.0.0.0", "Specify web server host")
-	flag.Parse()
-	//daemon(1, 1)
+	path, err := filepath.Abs(os.Args[0])
+	if nil != err {
+		fmt.Println(err)
+		return
+	}
+
+	//	port := flag.Int64("port", 8080, "Specify web server port")
+	//	host := flag.String("host", "0.0.0.0", "Specify web server host")
+	//	flag.Parse()
+
 	common.InitLogger()
+	bindir, _ := filepath.Split(path)
+	conf := bindir + "/../conf/appserver.conf"
+	if !common.InitConfig(conf) {
+		return
+	}
+	if common.EnableDaemon {
+		daemon(1, 1)
+	}
+
 	initWebHandlers()
-	if l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", *host, *port)); nil != err {
+	if l, err := net.Listen("tcp", common.ListenAddress); nil != err {
 		fmt.Printf("Failed to launch app http server for reason:%v\n", err)
 	} else {
 		pid := os.Getpid()
